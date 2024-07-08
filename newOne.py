@@ -7,18 +7,24 @@ def get_top_movies(n):
         print("输入的数字必须在1到250之间")
         return []
     
+    top_movies = []
+    pages = (n - 1) // 25 + 1  # 计算需要遍历的页数
     url = 'https://movie.douban.com/top250'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, 'html.parser')
 
-    top_movies = []
-    items = soup.find_all('div', class_='item')
-    for item in items[:n]:
-        title = item.find('span', class_='title').text
-        rating = item.find('span', class_='rating_num').text
-        top_movies.append({'title': title, 'rating': rating})
+    for page in range(pages):
+        params = {'start': page * 25}
+        response = requests.get(url, headers=headers, params=params)
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        items = soup.find_all('div', class_='item')
+        for item in items:
+            title = item.find('span', class_='title').text
+            rating = item.find('span', class_='rating_num').text
+            top_movies.append({'title': title, 'rating': rating})
+            if len(top_movies) == n:
+                return top_movies
     
     return top_movies
 
